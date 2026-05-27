@@ -1,8 +1,8 @@
 .navbar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(13,13,26,0.95);
+  background: rgba(15, 31, 15, 0.97);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #2a4a2a;
   height: var(--nav-height);
 }
 

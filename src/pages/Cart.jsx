@@ -13,7 +13,14 @@ import {
 } from "react-icons/fi";
 import { FaMoneyBillWave, FaWhatsapp } from "react-icons/fa";
 import { db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import MapPicker from "../components/MapPicker";
 import toast from "react-hot-toast";
 import "../styles/Cart.css";
 
@@ -62,9 +69,10 @@ export default function Cart() {
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [step, setStep] = useState(1); // 1 = cart, 2 = payment, 3 = confirm
+  const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
   const [address, setAddress] = useState("");
+  const [mapPosition, setMapPosition] = useState(null);
 
   const delivery = cartTotal > 50000 ? 0 : 1500;
   const total = cartTotal + delivery;
@@ -85,6 +93,10 @@ export default function Cart() {
 
     setPlacing(true);
     try {
+      // get user's saved profile location
+      const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+      const userProfile = userSnap.data();
+
       await addDoc(collection(db, "orders"), {
         userId: currentUser.uid,
         userEmail: currentUser.email,
@@ -95,14 +107,19 @@ export default function Cart() {
         total,
         paymentMethod,
         deliveryAddress: address,
+        userLocation: mapPosition
+          ? { lat: mapPosition[0], lng: mapPosition[1] }
+          : userProfile?.location || null,
         status: "pending",
         createdAt: serverTimestamp(),
       });
+
       await clearCart();
       toast.success("Order placed successfully! 🎉");
       navigate("/orders");
     } catch (e) {
       toast.error("Failed to place order. Please try again.");
+      console.error(e);
     } finally {
       setPlacing(false);
     }
@@ -138,7 +155,9 @@ export default function Cart() {
         {["Cart", "Payment", "Confirm"].map((s, i) => (
           <div
             key={s}
-            className={`checkout-step ${step > i ? "done" : ""} ${step === i + 1 ? "active" : ""}`}
+            className={`checkout-step ${step > i ? "done" : ""} ${
+              step === i + 1 ? "active" : ""
+            }`}
           >
             <div className="step-circle">{step > i + 1 ? "✓" : i + 1}</div>
             <span>{s}</span>
@@ -156,7 +175,7 @@ export default function Cart() {
           </div>
         )}
 
-        {/* STEP 2 - Payment Method */}
+        {/* STEP 2 - Payment & Location */}
         {step === 2 && (
           <div className="payment-section">
             <h2>Select Payment Method</h2>
@@ -164,7 +183,9 @@ export default function Cart() {
               {PAYMENT_METHODS.map((method) => (
                 <div
                   key={method.id}
-                  className={`payment-card ${paymentMethod === method.id ? "selected" : ""} ${method.disabled ? "disabled" : ""}`}
+                  className={`payment-card ${
+                    paymentMethod === method.id ? "selected" : ""
+                  } ${method.disabled ? "disabled" : ""}`}
                   onClick={() =>
                     !method.disabled && setPaymentMethod(method.id)
                   }
@@ -176,7 +197,9 @@ export default function Cart() {
                       <span>{method.desc}</span>
                     </div>
                     <div
-                      className={`payment-radio ${paymentMethod === method.id ? "checked" : ""}`}
+                      className={`payment-radio ${
+                        paymentMethod === method.id ? "checked" : ""
+                      }`}
                     />
                   </div>
                   {paymentMethod === method.id && (
@@ -189,14 +212,36 @@ export default function Cart() {
               ))}
             </div>
 
+            {/* Delivery Address */}
             <div className="delivery-address-section">
               <h3>Delivery Address</h3>
               <textarea
                 placeholder="Enter your full delivery address..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                rows={3}
+                rows={2}
               />
+
+              {/* Map for delivery location */}
+              <div className="cart-map-section">
+                <p className="cart-map-label">
+                  📍 Pin your exact delivery location on the map
+                  <span className="cart-map-optional">
+                    (optional but recommended)
+                  </span>
+                </p>
+                <MapPicker
+                  position={mapPosition}
+                  setPosition={setMapPosition}
+                  height="280px"
+                  fullscreenable={true}
+                />
+                {mapPosition && (
+                  <p className="cart-map-pinned">
+                    ✅ Location pinned — we'll use this for accurate delivery
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -243,6 +288,17 @@ export default function Cart() {
             <div className="confirm-block">
               <h4>📍 Delivery Address</h4>
               <p className="confirm-address">{address}</p>
+              {mapPosition && (
+                <a
+                  href={`https://www.google.com/maps?q=${mapPosition[0]},${mapPosition[1]}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="view-map-btn"
+                  style={{ marginTop: "0.5rem", display: "inline-flex" }}
+                >
+                  📍 View Pinned Location
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -270,6 +326,14 @@ export default function Cart() {
               <span>Payment</span>
               <span>
                 {PAYMENT_METHODS.find((m) => m.id === paymentMethod)?.label}
+              </span>
+            </div>
+          )}
+          {mapPosition && (
+            <div className="summary-row">
+              <span>📍 Location</span>
+              <span style={{ color: "var(--success)", fontSize: "0.82rem" }}>
+                Pinned ✅
               </span>
             </div>
           )}

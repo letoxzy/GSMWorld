@@ -37,6 +37,7 @@ const EMPTY_PRODUCT = {
   description: "",
   imageUrl: "",
   isNew: false,
+  condition: "New", // ← ADD THIS
   specs: { Storage: "", RAM: "", Battery: "", Display: "" },
 };
 
@@ -90,6 +91,7 @@ export default function AdminProducts() {
       description: product.description || "",
       imageUrl: product.imageUrl || "",
       isNew: product.isNew || false,
+      condition: product.condition || "New", // ← ADD THIS
       specs: product.specs || {
         Storage: "",
         RAM: "",
@@ -232,6 +234,7 @@ export default function AdminProducts() {
                 <th>Name</th>
                 <th>Brand</th>
                 <th>Category</th>
+                <th>Condition</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Status</th>
@@ -435,6 +438,36 @@ export default function AdminProducts() {
                   placeholder="Or paste image URL"
                   style={{ marginTop: 8 }}
                 />
+              </div>
+
+              {/* Condition */}
+              <div className="form-group">
+                <label>Condition</label>
+                <div className="condition-toggle">
+                  <button
+                    type="button"
+                    className={`condition-btn ${form.condition === "New" ? "active" : ""}`}
+                    onClick={() => setForm({ ...form, condition: "New" })}
+                  >
+                    ✨ New
+                  </button>
+                  <button
+                    type="button"
+                    className={`condition-btn ${form.condition === "Used" ? "active" : ""}`}
+                    onClick={() => setForm({ ...form, condition: "Used" })}
+                  >
+                    🔄 Used
+                  </button>
+                  <button
+                    type="button"
+                    className={`condition-btn ${form.condition === "Refurbished" ? "active" : ""}`}
+                    onClick={() =>
+                      setForm({ ...form, condition: "Refurbished" })
+                    }
+                  >
+                    🔧 Refurbished
+                  </button>
+                </div>
               </div>
 
               <div className="specs-grid">

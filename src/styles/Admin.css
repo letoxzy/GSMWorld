@@ -5,10 +5,12 @@
 /* Sidebar */
 .admin-sidebar {
   width: 240px; flex-shrink: 0;
-  background: var(--bg-card); border-right: 1px solid var(--border);
+  background: #0f1f0f;
+  border-right: 1px solid #2a4a2a;
   display: flex; flex-direction: column;
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
+
 
 .admin-brand {
   display: flex; align-items: center; gap: 0.75rem;
@@ -33,7 +35,11 @@
   transition: all 0.2s;
 }
 .admin-nav-item:hover { background: var(--bg-surface); color: var(--text); }
-.admin-nav-item.active { background: rgba(232,93,4,0.15); color: var(--primary); font-weight: 600; }
+.admin-nav-item.active {
+  background: rgba(232,93,4,0.15);
+  color: #e85d04;
+  font-weight: 600;
+}
 .admin-nav-item svg { font-size: 1.1rem; }
 
 .admin-sidebar-footer {
@@ -343,13 +349,13 @@
 
 .store-link {
   margin-top: auto;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #2a4a2a;
   padding-top: 0.75rem !important;
-  color: var(--primary) !important;
-  background: rgba(232,93,4,0.05);
+  color: #4caf50 !important;
+  background: rgba(76,175,80,0.05);
 }
 .store-link:hover {
-  background: rgba(232,93,4,0.15) !important;
+  background: rgba(76,175,80,0.15) !important;
 }
 
 /* Order extra info */
@@ -371,4 +377,52 @@
 
 @media (max-width: 600px) {
   .order-extra-info { grid-template-columns: 1fr; }
+}
+
+/* Condition Toggle */
+.condition-toggle {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.condition-btn {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.condition-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.condition-btn.active {
+  border-color: var(--primary);
+  background: rgba(232, 93, 4, 0.1);
+  color: var(--primary);
+}
+
+.condition-badge-table {
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.condition-badge-table.new {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+.condition-badge-table.used {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+.condition-badge-table.refurbished {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
 }

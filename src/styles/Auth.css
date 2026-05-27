@@ -3,8 +3,10 @@
 }
 
 .auth-left {
-  flex: 1; background: var(--gradient-dark);
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  flex: 1;
+  background: linear-gradient(135deg, #0f1f0f, #1e3a1e);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
   padding: 3rem; text-align: center;
   position: relative; overflow: hidden;
 }
@@ -17,8 +19,12 @@
 .auth-brand { margin-bottom: 2.5rem; }
 .auth-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 1rem; border-radius: 16px; box-shadow: 0 8px 32px rgba(232,93,4,0.3); }
 .auth-brand-name {
-  display: block; font-family: var(--font-display); font-size: 3rem;
-  color: var(--primary); line-height: 1; letter-spacing: 0.05em;
+  display: block;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: #e85d04;
+  line-height: 1;
+  letter-spacing: 0.05em;
 }
 .auth-brand-sub {
   display: block; font-family: var(--font-brand); font-size: 1rem;
@@ -26,17 +32,24 @@
   margin: 0.25rem 0;
 }
 .auth-brand-gsm {
-  display: block; font-family: var(--font-display); font-size: 2rem;
-  color: var(--text); letter-spacing: 0.1em;
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: #4caf50;
+  letter-spacing: 0.1em;
 }
 
 .auth-tagline h2 { font-size: 1.6rem; margin-bottom: 0.75rem; }
 .auth-tagline p { color: var(--text-muted); margin-bottom: 1.5rem; }
 .auth-perks { display: flex; flex-direction: column; gap: 0.5rem; }
 .auth-perks span {
-  background: rgba(232,93,4,0.1); border: 1px solid rgba(232,93,4,0.2);
-  padding: 0.5rem 1rem; border-radius: 25px;
-  font-size: 0.85rem; font-weight: 500; color: var(--text);
+  background: rgba(76,175,80,0.1);
+  border: 1px solid rgba(76,175,80,0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
 }
 
 .auth-right {

@@ -509,3 +509,171 @@
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--success);
 }
+
+/* DELIVERY OPTIONS */
+
+
+.delivery-title {
+  font-family: var(--font-alt);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+
+/* Delivery Methods */
+.delivery-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.delivery-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.delivery-card:hover {
+  border-color: var(--primary);
+  background: var(--bg-surface);
+}
+.delivery-card.selected {
+  border-color: var(--primary);
+  background: rgba(232, 93, 4, 0.05);
+}
+.delivery-card-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.delivery-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.delivery-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.delivery-info strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.delivery-info span {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.delivery-duration {
+  color: var(--primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+}
+.delivery-price-col {
+  text-align: right;
+  flex-shrink: 0;
+}
+.delivery-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.delivery-detail {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(232, 93, 4, 0.08);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: var(--primary);
+  font-weight: 500;
+  border-left: 3px solid var(--primary);
+}
+.delivery-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+.delivery-notice > span:first-child {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.delivery-notice strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #3b82f6;
+}
+.delivery-notice p {
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 600px) {
+  .delivery-card-top { flex-wrap: wrap; }
+  .delivery-price-col { order: -1; margin-left: auto; }
+}
+
+.delivery-eta {
+  font-size: 0.78rem;
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+.delivery-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ADDRESS INPUT */
+.delivery-address-wrap {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.delivery-address-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.delivery-address-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--gray-50);
+  resize: vertical;
+  transition: all 0.2s;
+  font-family: var(--font-main);
+}
+.delivery-address-input:focus {
+  border-color: var(--green);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+}
+
+.delivery-address-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+

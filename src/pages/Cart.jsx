@@ -24,13 +24,34 @@ import MapPicker from "../components/MapPicker";
 import toast from "react-hot-toast";
 import "../styles/Cart.css";
 
+const DELIVERY_METHODS = [
+  {
+    id: "door",
+    label: "Door Delivery",
+    icon: "🚚",
+    desc: "Delivered to your address",
+    duration: "1 - 2 business days",
+    price: 1500,
+    detail: "Our rider will deliver to your doorstep within Enugu",
+  },
+  {
+    id: "pickup",
+    label: "Pick Up from Store",
+    icon: "🏪",
+    desc: "Pick up at our Ogbete Market store",
+    duration: "Ready within 24 hours",
+    price: 0,
+    detail: "B139 Railway Line Ogbete Main Market, Enugu • Mon-Sat 8am-6pm",
+  },
+];
+
 const PAYMENT_METHODS = [
   {
     id: "transfer",
     label: "Bank Transfer",
     icon: <FiBriefcase />,
     desc: "Transfer to our bank account",
-    detail: "GTBank • 0123456789 • JOE BEST COMM SYS",
+    detail: "MONIEPOINT • 8035604475 • NWONU VICTOR CHISOM",
   },
   {
     id: "cash",
@@ -68,14 +89,16 @@ export default function Cart() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  const [deliveryMethod, setDeliveryMethod] = useState("door");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
   const [address, setAddress] = useState("");
   const [mapPosition, setMapPosition] = useState(null);
 
-  const delivery = cartTotal > 50000 ? 0 : 1500;
-  const total = cartTotal + delivery;
+  const deliveryFee =
+    deliveryMethod === "pickup" ? 0 : cartTotal > 50000 ? 0 : 1500;
+  const total = cartTotal + deliveryFee;
 
   async function handleCheckout() {
     if (!currentUser) {
@@ -87,13 +110,16 @@ export default function Cart() {
       return;
     }
     if (!address.trim()) {
-      toast.error("Please enter your delivery address");
+      toast.error(
+        deliveryMethod === "door"
+          ? "Please enter your delivery address"
+          : "Please enter your phone number",
+      );
       return;
     }
 
     setPlacing(true);
     try {
-      // get user's saved profile location
       const userSnap = await getDoc(doc(db, "users", currentUser.uid));
       const userProfile = userSnap.data();
 
@@ -103,9 +129,10 @@ export default function Cart() {
         userName: currentUser.displayName,
         items: cartItems,
         subtotal: cartTotal,
-        delivery,
+        delivery: deliveryFee,
         total,
         paymentMethod,
+        deliveryMethod,
         deliveryAddress: address,
         userLocation: mapPosition
           ? { lat: mapPosition[0], lng: mapPosition[1] }
@@ -152,7 +179,7 @@ export default function Cart() {
 
       {/* Step Indicator */}
       <div className="checkout-steps">
-        {["Cart", "Payment", "Confirm"].map((s, i) => (
+        {["Cart", "Delivery & Payment", "Confirm"].map((s, i) => (
           <div
             key={s}
             className={`checkout-step ${step > i ? "done" : ""} ${
@@ -175,10 +202,63 @@ export default function Cart() {
           </div>
         )}
 
-        {/* STEP 2 - Payment & Location */}
+        {/* STEP 2 - Delivery & Payment */}
         {step === 2 && (
           <div className="payment-section">
-            <h2>Select Payment Method</h2>
+            {/* DELIVERY METHOD */}
+            <h2>Choose Delivery Method</h2>
+            <div className="delivery-methods">
+              {DELIVERY_METHODS.map((method) => (
+                <div
+                  key={method.id}
+                  className={`delivery-card ${
+                    deliveryMethod === method.id ? "selected" : ""
+                  }`}
+                  onClick={() => setDeliveryMethod(method.id)}
+                >
+                  <div className="delivery-card-top">
+                    <span className="delivery-icon">{method.icon}</span>
+                    <div className="delivery-info">
+                      <strong>{method.label}</strong>
+                      <span>{method.desc}</span>
+                      <span className="delivery-duration">
+                        🕐 {method.duration}
+                      </span>
+                    </div>
+                    <div className="delivery-price-col">
+                      <span className="delivery-price">
+                        {method.price === 0
+                          ? "FREE"
+                          : `₦${method.price.toLocaleString()}`}
+                      </span>
+                    </div>
+                    <div
+                      className={`payment-radio ${
+                        deliveryMethod === method.id ? "checked" : ""
+                      }`}
+                    />
+                  </div>
+                  {deliveryMethod === method.id && (
+                    <div className="delivery-detail">📍 {method.detail}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Delivery notice */}
+            <div className="delivery-notice">
+              <span>⏰</span>
+              <div>
+                <strong>Delivery Information</strong>
+                <p>
+                  Orders placed before 12pm are processed same day. Orders after
+                  12pm are processed next business day.
+                </p>
+              </div>
+            </div>
+
+            {/* PAYMENT METHOD */}
+            <h2 style={{ marginTop: "1.5rem" }}>Select Payment Method</h2>
             <div className="payment-methods">
               {PAYMENT_METHODS.map((method) => (
                 <div
@@ -212,36 +292,46 @@ export default function Cart() {
               ))}
             </div>
 
-            {/* Delivery Address */}
+            {/* ADDRESS / CONTACT */}
             <div className="delivery-address-section">
-              <h3>Delivery Address</h3>
+              <h3>
+                {deliveryMethod === "door"
+                  ? "Delivery Address"
+                  : "Contact Number for Pickup"}
+              </h3>
               <textarea
-                placeholder="Enter your full delivery address..."
+                placeholder={
+                  deliveryMethod === "door"
+                    ? "Enter your full delivery address..."
+                    : "Enter your phone number for pickup notification..."
+                }
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 rows={2}
               />
 
-              {/* Map for delivery location */}
-              <div className="cart-map-section">
-                <p className="cart-map-label">
-                  📍 Pin your exact delivery location on the map
-                  <span className="cart-map-optional">
-                    (optional but recommended)
-                  </span>
-                </p>
-                <MapPicker
-                  position={mapPosition}
-                  setPosition={setMapPosition}
-                  height="280px"
-                  fullscreenable={true}
-                />
-                {mapPosition && (
-                  <p className="cart-map-pinned">
-                    ✅ Location pinned — we'll use this for accurate delivery
+              {/* Map only for door delivery */}
+              {deliveryMethod === "door" && (
+                <div className="cart-map-section">
+                  <p className="cart-map-label">
+                    📍 Pin your exact delivery location on the map
+                    <span className="cart-map-optional">
+                      (optional but recommended)
+                    </span>
                   </p>
-                )}
-              </div>
+                  <MapPicker
+                    position={mapPosition}
+                    setPosition={setMapPosition}
+                    height="280px"
+                    fullscreenable={true}
+                  />
+                  {mapPosition && (
+                    <p className="cart-map-pinned">
+                      ✅ Location pinned — we'll use this for accurate delivery
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -251,6 +341,7 @@ export default function Cart() {
           <div className="confirm-section">
             <h2>Confirm Your Order</h2>
 
+            {/* Items */}
             <div className="confirm-block">
               <h4>📦 Items ({cartItems.length})</h4>
               {cartItems.map((item) => (
@@ -272,6 +363,36 @@ export default function Cart() {
               ))}
             </div>
 
+            {/* Delivery Method */}
+            <div className="confirm-block">
+              <h4>🚚 Delivery Method</h4>
+              <div className="confirm-payment">
+                <span style={{ fontSize: "1.5rem" }}>
+                  {DELIVERY_METHODS.find((m) => m.id === deliveryMethod)?.icon}
+                </span>
+                <span>
+                  {DELIVERY_METHODS.find((m) => m.id === deliveryMethod)?.label}
+                </span>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    fontSize: "0.78rem",
+                    color: "var(--primary)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {
+                    DELIVERY_METHODS.find((m) => m.id === deliveryMethod)
+                      ?.duration
+                  }
+                </span>
+              </div>
+              <p className="confirm-payment-detail">
+                {DELIVERY_METHODS.find((m) => m.id === deliveryMethod)?.detail}
+              </p>
+            </div>
+
+            {/* Payment Method */}
             <div className="confirm-block">
               <h4>💳 Payment Method</h4>
               <div className="confirm-payment">
@@ -285,8 +406,13 @@ export default function Cart() {
               </p>
             </div>
 
+            {/* Address */}
             <div className="confirm-block">
-              <h4>📍 Delivery Address</h4>
+              <h4>
+                {deliveryMethod === "door"
+                  ? "📍 Delivery Address"
+                  : "📞 Pickup Contact"}
+              </h4>
               <p className="confirm-address">{address}</p>
               {mapPosition && (
                 <a
@@ -303,7 +429,7 @@ export default function Cart() {
           </div>
         )}
 
-        {/* Order Summary - always visible */}
+        {/* Order Summary */}
         <div className="cart-summary">
           <h3>Order Summary</h3>
           <div className="summary-row">
@@ -313,14 +439,25 @@ export default function Cart() {
           <div className="summary-row">
             <span>Delivery</span>
             <span>
-              {delivery === 0 ? "FREE" : `₦${delivery.toLocaleString()}`}
+              {deliveryFee === 0 ? (
+                <span style={{ color: "var(--success)" }}>FREE</span>
+              ) : (
+                `₦${deliveryFee.toLocaleString()}`
+              )}
             </span>
           </div>
-          {delivery === 0 && (
+          {deliveryMethod === "pickup" && (
             <p className="free-delivery-note">
-              🎉 Free delivery on orders above ₦50,000!
+              🏪 Pick up at Ogbete Market — No delivery fee!
             </p>
           )}
+          {deliveryMethod === "door" &&
+            deliveryFee === 0 &&
+            cartTotal > 50000 && (
+              <p className="free-delivery-note">
+                🎉 Free delivery on orders above ₦50,000!
+              </p>
+            )}
           {paymentMethod && (
             <div className="summary-row">
               <span>Payment</span>
@@ -342,10 +479,10 @@ export default function Cart() {
             <span>₦{total.toLocaleString()}</span>
           </div>
 
-          {/* Step Navigation */}
+          {/* Navigation */}
           {step === 1 && (
             <button className="checkout-btn" onClick={() => setStep(2)}>
-              Continue to Payment <FiArrowRight />
+              Continue <FiArrowRight />
             </button>
           )}
           {step === 2 && (
@@ -361,7 +498,11 @@ export default function Cart() {
                     return;
                   }
                   if (!address.trim()) {
-                    toast.error("Enter delivery address");
+                    toast.error(
+                      deliveryMethod === "door"
+                        ? "Enter delivery address"
+                        : "Enter your phone number",
+                    );
                     return;
                   }
                   setStep(3);

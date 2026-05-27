@@ -16,8 +16,8 @@ import MapPicker from "../components/MapPicker";
 import toast from "react-hot-toast";
 
 // ← replace these with your Cloudinary values
-const CLOUD_NAME = "YOUR_CLOUD_NAME";
-const UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+const CLOUD_NAME = "dedpaxzta";
+const UPLOAD_PRESET = "joebest_products";
 
 export default function Profile() {
   const { currentUser, userProfile } = useAuth();

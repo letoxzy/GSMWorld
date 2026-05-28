@@ -258,14 +258,14 @@ export default function AdminDashboard() {
             <Link to="/admin/users" className="quick-action-card">
               <FiUsers /> <span>View Users</span>
             </Link>
-            <a
+            {/* <a
               href="https://console.firebase.google.com"
               target="_blank"
               rel="noreferrer"
               className="quick-action-card"
             >
               <FiSettings /> <span>Firebase Console</span>
-            </a>
+            </a> */}
           </div>
         </div>
 

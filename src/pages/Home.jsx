@@ -85,7 +85,7 @@ export default function Home() {
               Shop Now <FiArrowRight />
             </Link>
             <a
-              href="https://wa.me/2348064093705"
+              href="https://wa.me/2348035604475"
               className="btn-outline"
               target="_blank"
               rel="noreferrer"
@@ -190,7 +190,7 @@ export default function Home() {
           <h3>Get the Best Deals in Enugu!</h3>
           <p>
             Visit us at B139 Railway Line Ogbete Main Market or call{" "}
-            <strong>08064093705</strong>
+            <strong>8035604475</strong>
           </p>
           <Link to="/products" className="btn-primary">
             Browse Deals <FiArrowRight />
@@ -243,11 +243,11 @@ export default function Home() {
           />
         </div>
         <div className="contact-cta">
-          <a href="tel:08064093705" className="btn-primary">
+          <a href="tel:8035604475" className="btn-primary">
             📞 Call Us
           </a>
           <a
-            href="https://wa.me/2348064093705"
+            href="https://wa.me/8035604475"
             className="btn-outline"
             target="_blank"
             rel="noreferrer"

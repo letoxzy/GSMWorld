@@ -35,7 +35,7 @@ export default function Footer() {
             <a href="#" aria-label="Twitter">
               <FiTwitter />
             </a>
-            <a href="https://wa.me/2348064093705" aria-label="WhatsApp">
+            <a href="https://wa.me/2348035604475" aria-label="WhatsApp">
               <FaWhatsapp />
             </a>
           </div>
@@ -67,11 +67,11 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <FiPhone />
-            <a href="tel:08064093705">08064093705</a>
+            <a href="tel:08035604475">08035604475</a>
           </div>
           <div className="contact-item">
             <FaWhatsapp />
-            <a href="https://wa.me/2348064093705">08064093705</a>
+            <a href="https://wa.me/2348035604475">08035604475</a>
           </div>
           <div className="contact-item">
             <FiMail />

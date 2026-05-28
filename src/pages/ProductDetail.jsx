@@ -242,14 +242,14 @@ export default function ProductDetail() {
 
           <div className="contact-seller">
             <a
-              href="https://wa.me/2348064093705"
+              href="https://wa.me/2348035604475"
               target="_blank"
               rel="noreferrer"
               className="whatsapp-btn"
             >
               💬 Ask on WhatsApp
             </a>
-            <a href="tel:08064093705" className="call-btn">
+            <a href="tel:08035604475" className="call-btn">
               📞 Call Us
             </a>
           </div>

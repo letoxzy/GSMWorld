@@ -247,9 +247,8 @@ export default function MapPicker({
         style={{ height, width: "100%", borderRadius: "12px" }}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          attribution="© OpenStreetMap contributors © CARTO"
-          subdomains="abcd"
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
         <ClickHandler onPositionChange={handleMapClick} />
@@ -311,9 +310,8 @@ export default function MapPicker({
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                attribution="© OpenStreetMap contributors © CARTO"
-                subdomains="abcd"
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 maxZoom={19}
               />
               <ClickHandler onPositionChange={handleMapClick} />

@@ -50,7 +50,7 @@ function SearchBar({
         <FiSearch className="map-search-icon" />
         <input
           type="text"
-          placeholder="Search for your location in Nigeria..."
+          placeholder="Search for any location worldwide..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -121,9 +121,7 @@ export default function MapPicker({
     setSearching(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query + " Nigeria",
-        )}&limit=5&countrycodes=ng`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
         { headers: { "Accept-Language": "en" } },
       );
       const data = await res.json();
@@ -221,7 +219,7 @@ export default function MapPicker({
         </div>
       )}
 
-      {/* Search bar - normal */}
+      {/* Search bar */}
       <SearchBar
         search={search}
         setSearch={setSearch}
@@ -242,15 +240,10 @@ export default function MapPicker({
 
       {/* Normal Map */}
       <MapContainer
-        center={position || [9.082, 8.6753]}
-        zoom={position ? 14 : 6}
-        minZoom={5}
+        center={position || [20, 0]}
+        zoom={position ? 14 : 2}
+        minZoom={2}
         maxZoom={19}
-        maxBounds={[
-          [4.2406, 2.6917],
-          [13.8659, 14.678],
-        ]}
-        maxBoundsViscosity={1.0}
         style={{ height, width: "100%", borderRadius: "12px" }}
       >
         <TileLayer
@@ -311,15 +304,10 @@ export default function MapPicker({
           {/* Fullscreen Map */}
           <div style={{ flex: 1, position: "relative" }}>
             <MapContainer
-              center={position || [9.082, 8.6753]}
-              zoom={position ? 14 : 6}
-              minZoom={5}
+              center={position || [20, 0]}
+              zoom={position ? 14 : 2}
+              minZoom={2}
               maxZoom={19}
-              maxBounds={[
-                [4.2406, 2.6917],
-                [13.8659, 14.678],
-              ]}
-              maxBoundsViscosity={1.0}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer

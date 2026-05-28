@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   collection,
   getDocs,
@@ -23,6 +23,7 @@ import {
   FiSave,
   FiUpload,
   FiHome,
+  FiMenu,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import "../../styles/Admin.css";
@@ -37,7 +38,7 @@ const EMPTY_PRODUCT = {
   description: "",
   imageUrl: "",
   isNew: false,
-  condition: "New", // ← ADD THIS
+  condition: "New",
   specs: { Storage: "", RAM: "", Battery: "", Display: "" },
 };
 
@@ -46,6 +47,8 @@ const UPLOAD_PRESET = "joebest_products";
 
 export default function AdminProducts() {
   const { currentUser } = useAuth();
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -91,7 +94,7 @@ export default function AdminProducts() {
       description: product.description || "",
       imageUrl: product.imageUrl || "",
       isNew: product.isNew || false,
-      condition: product.condition || "New", // ← ADD THIS
+      condition: product.condition || "New",
       specs: product.specs || {
         Storage: "",
         RAM: "",
@@ -111,13 +114,11 @@ export default function AdminProducts() {
     setSaving(true);
     try {
       let imageUrl = form.imageUrl;
-
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
         formData.append("upload_preset", UPLOAD_PRESET);
         formData.append("folder", "gsmworld/products");
-
         const res = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
           { method: "POST", body: formData },
@@ -126,7 +127,6 @@ export default function AdminProducts() {
         if (!data.secure_url) throw new Error("Cloudinary upload failed");
         imageUrl = data.secure_url;
       }
-
       const productData = {
         ...form,
         price: Number(form.price),
@@ -135,7 +135,6 @@ export default function AdminProducts() {
         imageUrl,
         updatedAt: serverTimestamp(),
       };
-
       if (editProduct) {
         await updateDoc(doc(db, "products", editProduct.id), productData);
         toast.success("Product updated!");
@@ -148,7 +147,6 @@ export default function AdminProducts() {
         });
         toast.success("Product added!");
       }
-
       setShowModal(false);
       fetchProducts();
     } catch (e) {
@@ -181,7 +179,43 @@ export default function AdminProducts() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-topbar">
+        <div className="admin-mobile-brand">
+          <img src="/logo.png" alt="Logo" />
+          <span>G.S.M WORLD</span>
+        </div>
+        <button className="admin-hamburger" onClick={() => setDrawerOpen(true)}>
+          <FiMenu />
+        </button>
+      </div>
+
+      {/* Drawer Overlay */}
+      <div
+        className={`admin-drawer-overlay ${drawerOpen ? "open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${drawerOpen ? "drawer-open" : ""}`}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "0.5rem 1rem",
+          }}
+        >
+          <button
+            onClick={() => setDrawerOpen(false)}
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "1.2rem",
+              display: "flex",
+            }}
+          >
+            <FiX />
+          </button>
+        </div>
         <div className="admin-brand">
           <img src="/logo.png" alt="Logo" className="admin-logo" />
           <div>
@@ -190,25 +224,45 @@ export default function AdminProducts() {
           </div>
         </div>
         <nav className="admin-nav">
-          <Link to="/admin" className="admin-nav-item">
+          <Link
+            to="/admin"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiGrid /> Dashboard
           </Link>
-          <Link to="/admin/products" className="admin-nav-item">
+          <Link
+            to="/admin/products"
+            className="admin-nav-item active"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiPackage /> Products
           </Link>
-          <Link to="/admin/orders" className="admin-nav-item">
+          <Link
+            to="/admin/orders"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiShoppingCart /> Orders
           </Link>
-          <Link to="/admin/users" className="admin-nav-item">
+          <Link
+            to="/admin/users"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiUsers /> Users
           </Link>
-
-          <Link to="/" className="admin-nav-item store-link" target="_blank">
+          <Link
+            to="/"
+            className="admin-nav-item store-link"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiHome /> View Store
           </Link>
         </nav>
       </aside>
 
+      {/* Main */}
       <main className="admin-main">
         <div className="admin-topbar">
           <h1>Products Management</h1>
@@ -244,13 +298,13 @@ export default function AdminProducts() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="table-loading">
+                  <td colSpan="9" className="table-loading">
                     Loading products...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="table-empty">
+                  <td colSpan="9" className="table-empty">
                     No products found
                   </td>
                 </tr>
@@ -269,13 +323,18 @@ export default function AdminProducts() {
                     <td>
                       <span className="category-tag">{p.category}</span>
                     </td>
+                    <td>
+                      <span
+                        className={`condition-badge-table ${p.condition?.toLowerCase() || "new"}`}
+                      >
+                        {p.condition || "New"}
+                      </span>
+                    </td>
                     <td>₦{Number(p.price).toLocaleString()}</td>
                     <td>{p.stock}</td>
                     <td>
                       <span
-                        className={`stock-badge ${
-                          p.stock > 0 ? "in-stock" : "out-stock"
-                        }`}
+                        className={`stock-badge ${p.stock > 0 ? "in-stock" : "out-stock"}`}
                       >
                         {p.stock > 0 ? "In Stock" : "Out of Stock"}
                       </span>
@@ -316,7 +375,6 @@ export default function AdminProducts() {
                 <FiX />
               </button>
             </div>
-
             <div className="modal-body">
               <div className="modal-grid">
                 <div className="form-group">
@@ -440,33 +498,19 @@ export default function AdminProducts() {
                 />
               </div>
 
-              {/* Condition */}
               <div className="form-group">
                 <label>Condition</label>
                 <div className="condition-toggle">
-                  <button
-                    type="button"
-                    className={`condition-btn ${form.condition === "New" ? "active" : ""}`}
-                    onClick={() => setForm({ ...form, condition: "New" })}
-                  >
-                    ✨ New
-                  </button>
-                  <button
-                    type="button"
-                    className={`condition-btn ${form.condition === "Used" ? "active" : ""}`}
-                    onClick={() => setForm({ ...form, condition: "Used" })}
-                  >
-                    🔄 Used
-                  </button>
-                  <button
-                    type="button"
-                    className={`condition-btn ${form.condition === "Refurbished" ? "active" : ""}`}
-                    onClick={() =>
-                      setForm({ ...form, condition: "Refurbished" })
-                    }
-                  >
-                    🔧 Refurbished
-                  </button>
+                  {["New", "Used", "Refurbished"].map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`condition-btn ${form.condition === c ? "active" : ""}`}
+                      onClick={() => setForm({ ...form, condition: c })}
+                    >
+                      {c === "New" ? "✨" : c === "Used" ? "🔄" : "🔧"} {c}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -524,6 +568,44 @@ export default function AdminProducts() {
           </div>
         </div>
       )}
+
+      {/* Bottom Nav */}
+      <nav className="admin-bottom-nav">
+        <div className="admin-bottom-nav-items">
+          <Link
+            to="/admin"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin" ? "active" : ""}`}
+          >
+            <FiGrid />
+            <span>Dashboard</span>
+          </Link>
+          <Link
+            to="/admin/products"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/products" ? "active" : ""}`}
+          >
+            <FiPackage />
+            <span>Products</span>
+          </Link>
+          <Link
+            to="/admin/orders"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/orders" ? "active" : ""}`}
+          >
+            <FiShoppingCart />
+            <span>Orders</span>
+          </Link>
+          <Link
+            to="/admin/users"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/users" ? "active" : ""}`}
+          >
+            <FiUsers />
+            <span>Users</span>
+          </Link>
+          <Link to="/" className="admin-bottom-nav-item">
+            <FiHome />
+            <span>Store</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }

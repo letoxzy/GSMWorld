@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
 import {
@@ -9,12 +9,13 @@ import {
   FiGrid,
   FiChevronDown,
   FiHome,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import "../../styles/Admin.css";
 
 const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
-
 const STATUS_COLORS = {
   pending: "#f59e0b",
   confirmed: "#3b82f6",
@@ -34,7 +35,17 @@ function getPaymentLabel(method) {
   return methods[method] || "Not specified";
 }
 
+function getDeliveryLabel(method) {
+  const methods = {
+    door: "🚚 Door Delivery",
+    pickup: "🏪 Store Pickup",
+  };
+  return methods[method] || "Not specified";
+}
+
 export default function AdminOrders() {
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
@@ -80,40 +91,96 @@ export default function AdminOrders() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-topbar">
+        <div className="admin-mobile-brand">
+          <img src="/logo.png" alt="Logo" />
+          <span>G.S.M WORLD</span>
+        </div>
+        <button className="admin-hamburger" onClick={() => setDrawerOpen(true)}>
+          <FiMenu />
+        </button>
+      </div>
+
+      {/* Drawer Overlay */}
+      <div
+        className={`admin-drawer-overlay ${drawerOpen ? "open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${drawerOpen ? "drawer-open" : ""}`}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "0.5rem 1rem",
+          }}
+        >
+          <button
+            onClick={() => setDrawerOpen(false)}
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "1.2rem",
+              display: "flex",
+            }}
+          >
+            <FiX />
+          </button>
+        </div>
         <div className="admin-brand">
-          <img src="/assets/logo.png" alt="Logo" className="admin-logo" />
+          <img src="/logo.png" alt="Logo" className="admin-logo" />
           <div>
             <p className="admin-brand-name">JOE, BEST</p>
             <p className="admin-brand-gsm">G.S.M WORLD</p>
           </div>
         </div>
         <nav className="admin-nav">
-          <Link to="/admin" className="admin-nav-item">
+          <Link
+            to="/admin"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiGrid /> Dashboard
           </Link>
-          <Link to="/admin/products" className="admin-nav-item">
+          <Link
+            to="/admin/products"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiPackage /> Products
           </Link>
-          <Link to="/admin/orders" className="admin-nav-item active">
+          <Link
+            to="/admin/orders"
+            className="admin-nav-item active"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiShoppingCart /> Orders
           </Link>
-          <Link to="/admin/users" className="admin-nav-item">
+          <Link
+            to="/admin/users"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiUsers /> Users
           </Link>
-          <Link to="/" className="admin-nav-item store-link">
+          <Link
+            to="/"
+            className="admin-nav-item store-link"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiHome /> View Store
           </Link>
         </nav>
       </aside>
 
+      {/* Main */}
       <main className="admin-main">
         <div className="admin-topbar">
           <h1>Orders Management</h1>
           <span className="orders-count">{filtered.length} orders</span>
         </div>
 
-        {/* Status Filter Tabs */}
         <div className="status-filter-tabs">
           {["all", ...STATUSES].map((s) => (
             <button
@@ -139,7 +206,6 @@ export default function AdminOrders() {
           ) : (
             filtered.map((order) => (
               <div key={order.id} className="admin-order-card">
-                {/* Order Header */}
                 <div
                   className="admin-order-header"
                   onClick={() =>
@@ -174,15 +240,13 @@ export default function AdminOrders() {
                   </div>
                 </div>
 
-                {/* Order Body */}
                 {expanded === order.id && (
                   <div className="admin-order-body">
-                    {/* Items */}
                     <div className="admin-order-items">
                       {order.items?.map((item, i) => (
                         <div className="admin-order-item" key={i}>
                           <img
-                            src={item.imageUrl || "/assets/placeholder.png"}
+                            src={item.imageUrl || "/placeholder.png"}
                             alt={item.name}
                           />
                           <div>
@@ -198,11 +262,16 @@ export default function AdminOrders() {
                       ))}
                     </div>
 
-                    {/* Order Info */}
                     <div className="order-extra-info">
                       <div className="order-info-item">
                         <span>💳 Payment Method</span>
                         <strong>{getPaymentLabel(order.paymentMethod)}</strong>
+                      </div>
+                      <div className="order-info-item">
+                        <span>🚚 Delivery Method</span>
+                        <strong>
+                          {getDeliveryLabel(order.deliveryMethod)}
+                        </strong>
                       </div>
                       <div className="order-info-item">
                         <span>📍 Delivery Address</span>
@@ -233,7 +302,6 @@ export default function AdminOrders() {
                       )}
                     </div>
 
-                    {/* Totals */}
                     <div className="admin-order-totals">
                       <span>Subtotal: ₦{order.subtotal?.toLocaleString()}</span>
                       <span>
@@ -245,7 +313,6 @@ export default function AdminOrders() {
                       <strong>Total: ₦{order.total?.toLocaleString()}</strong>
                     </div>
 
-                    {/* Status Update */}
                     <div className="status-update-row">
                       <label>Update Status:</label>
                       <div className="status-buttons">
@@ -269,6 +336,44 @@ export default function AdminOrders() {
           )}
         </div>
       </main>
+
+      {/* Bottom Nav */}
+      <nav className="admin-bottom-nav">
+        <div className="admin-bottom-nav-items">
+          <Link
+            to="/admin"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin" ? "active" : ""}`}
+          >
+            <FiGrid />
+            <span>Dashboard</span>
+          </Link>
+          <Link
+            to="/admin/products"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/products" ? "active" : ""}`}
+          >
+            <FiPackage />
+            <span>Products</span>
+          </Link>
+          <Link
+            to="/admin/orders"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/orders" ? "active" : ""}`}
+          >
+            <FiShoppingCart />
+            <span>Orders</span>
+          </Link>
+          <Link
+            to="/admin/users"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/users" ? "active" : ""}`}
+          >
+            <FiUsers />
+            <span>Users</span>
+          </Link>
+          <Link to="/" className="admin-bottom-nav-item">
+            <FiHome />
+            <span>Store</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }

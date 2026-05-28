@@ -1,7 +1,14 @@
-import { Link } from 'react-router-dom'
-import '../styles/Footer.css'
-import { FiMapPin, FiPhone, FiMail, FiFacebook, FiInstagram, FiTwitter } from 'react-icons/fi'
-import { FaWhatsapp } from 'react-icons/fa'
+import { Link } from "react-router-dom";
+import "../styles/Footer.css";
+import {
+  FiMapPin,
+  FiPhone,
+  FiMail,
+  FiFacebook,
+  FiInstagram,
+  FiTwitter,
+} from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -15,13 +22,22 @@ export default function Footer() {
             <span className="footer-gsm">G.S.M WORLD</span>
           </div>
           <p className="footer-desc">
-            Your #1 trusted mobile phone shop in Enugu. Quality phones, accessories and repairs at the best prices.
+            Your #1 trusted mobile phone shop in Enugu. Quality phones and
+            accessories at the best prices.
           </p>
           <div className="footer-socials">
-            <a href="#" aria-label="Facebook"><FiFacebook /></a>
-            <a href="#" aria-label="Instagram"><FiInstagram /></a>
-            <a href="#" aria-label="Twitter"><FiTwitter /></a>
-            <a href="https://wa.me/2348064093705" aria-label="WhatsApp"><FaWhatsapp /></a>
+            <a href="#" aria-label="Facebook">
+              <FiFacebook />
+            </a>
+            <a href="#" aria-label="Instagram">
+              <FiInstagram />
+            </a>
+            <a href="#" aria-label="Twitter">
+              <FiTwitter />
+            </a>
+            <a href="https://wa.me/2348064093705" aria-label="WhatsApp">
+              <FaWhatsapp />
+            </a>
           </div>
         </div>
 
@@ -55,19 +71,22 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <FaWhatsapp />
-            <a href="https://wa.me/2348123817997">08123817997</a>
+            <a href="https://wa.me/2348064093705">08064093705</a>
           </div>
           <div className="contact-item">
             <FiMail />
-            <a href="mailto:info@joebest.com">info@joebest.com</a>
+            <a href="mailto:joebest@.com">joebest@gmail.com</a>
           </div>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} JOE, BEST Communication System G.S.M WORLD. All rights reserved.</p>
+        <p>
+          © {new Date().getFullYear()} JOE, BEST Communication System G.S.M
+          WORLD. All rights reserved.
+        </p>
         <p>B139 Railway Line Ogbete Main Market, Enugu</p>
       </div>
     </footer>
-  )
+  );
 }

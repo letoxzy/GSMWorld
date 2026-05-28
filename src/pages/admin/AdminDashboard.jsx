@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -14,12 +14,16 @@ import {
   FiSettings,
   FiTrendingUp,
   FiHome,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
 import "../../styles/Admin.css";
 
 export default function AdminDashboard() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [stats, setStats] = useState({
     products: 0,
     orders: 0,
@@ -73,8 +77,44 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-layout">
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-topbar">
+        <div className="admin-mobile-brand">
+          <img src="/logo.png" alt="Logo" />
+          <span>G.S.M WORLD</span>
+        </div>
+        <button className="admin-hamburger" onClick={() => setDrawerOpen(true)}>
+          <FiMenu />
+        </button>
+      </div>
+
+      {/* Drawer Overlay */}
+      <div
+        className={`admin-drawer-overlay ${drawerOpen ? "open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
       {/* Sidebar */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${drawerOpen ? "drawer-open" : ""}`}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "0.5rem 1rem",
+          }}
+        >
+          <button
+            onClick={() => setDrawerOpen(false)}
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "1.2rem",
+              display: "flex",
+            }}
+          >
+            <FiX />
+          </button>
+        </div>
+
         <div className="admin-brand">
           <img src="/logo.png" alt="Logo" className="admin-logo" />
           <div>
@@ -84,20 +124,39 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="admin-nav">
-          <Link to="/admin" className="admin-nav-item">
+          <Link
+            to="/admin"
+            className="admin-nav-item active"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiGrid /> Dashboard
           </Link>
-          <Link to="/admin/products" className="admin-nav-item">
+          <Link
+            to="/admin/products"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiPackage /> Products
           </Link>
-          <Link to="/admin/orders" className="admin-nav-item">
+          <Link
+            to="/admin/orders"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiShoppingCart /> Orders
           </Link>
-          <Link to="/admin/users" className="admin-nav-item">
+          <Link
+            to="/admin/users"
+            className="admin-nav-item"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiUsers /> Users
           </Link>
-
-          <Link to="/" className="admin-nav-item store-link" target="_blank">
+          <Link
+            to="/"
+            className="admin-nav-item store-link"
+            onClick={() => setDrawerOpen(false)}
+          >
             <FiHome /> View Store
           </Link>
         </nav>
@@ -137,7 +196,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats */}
         <div className="admin-stats-grid">
           {[
             {
@@ -274,6 +333,44 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Bottom Nav - Mobile */}
+      <nav className="admin-bottom-nav">
+        <div className="admin-bottom-nav-items">
+          <Link
+            to="/admin"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin" ? "active" : ""}`}
+          >
+            <FiGrid />
+            <span>Dashboard</span>
+          </Link>
+          <Link
+            to="/admin/products"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/products" ? "active" : ""}`}
+          >
+            <FiPackage />
+            <span>Products</span>
+          </Link>
+          <Link
+            to="/admin/orders"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/orders" ? "active" : ""}`}
+          >
+            <FiShoppingCart />
+            <span>Orders</span>
+          </Link>
+          <Link
+            to="/admin/users"
+            className={`admin-bottom-nav-item ${location.pathname === "/admin/users" ? "active" : ""}`}
+          >
+            <FiUsers />
+            <span>Users</span>
+          </Link>
+          <Link to="/" className="admin-bottom-nav-item">
+            <FiHome />
+            <span>Store</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }

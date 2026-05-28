@@ -338,7 +338,6 @@
 
 @media (max-width: 900px) {
   .admin-sidebar { display: none; }
-  .admin-stats-grid { grid-template-columns: repeat(2, 1fr); padding: 1rem; }
   .admin-section { padding: 0 1rem 1.5rem; }
   .admin-topbar { padding: 1rem; }
   .admin-search-bar { padding: 1rem; }

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -16,6 +22,7 @@ import {
   FiHome,
   FiMenu,
   FiX,
+  FiBell,
 } from "react-icons/fi";
 import "../../styles/Admin.css";
 
@@ -24,6 +31,9 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showNotif, setShowNotif] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [newOrders, setNewOrders] = useState([]);
   const [stats, setStats] = useState({
     products: 0,
     orders: 0,
@@ -33,6 +43,7 @@ export default function AdminDashboard() {
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch general stats
   useEffect(() => {
     async function fetchStats() {
       try {
@@ -62,6 +73,23 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
+  // Real-time pending orders listener
+  useEffect(() => {
+    const pendingQuery = query(
+      collection(db, "orders"),
+      where("status", "==", "pending"),
+    );
+    const unsub = onSnapshot(pendingQuery, (snap) => {
+      const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      orders.sort(
+        (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0),
+      );
+      setPendingCount(orders.length);
+      setNewOrders(orders.slice(0, 5));
+    });
+    return () => unsub();
+  }, []);
+
   async function handleLogout() {
     await logout();
     navigate("/login");
@@ -83,9 +111,25 @@ export default function AdminDashboard() {
           <img src="/logo.png" alt="Logo" />
           <span>G.S.M WORLD</span>
         </div>
-        <button className="admin-hamburger" onClick={() => setDrawerOpen(true)}>
-          <FiMenu />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {/* Mobile notification bell */}
+          <button
+            className="admin-notif-btn"
+            onClick={() => setShowNotif(!showNotif)}
+            style={{ position: "relative" }}
+          >
+            <FiBell />
+            {pendingCount > 0 && (
+              <span className="admin-notif-badge">{pendingCount}</span>
+            )}
+          </button>
+          <button
+            className="admin-hamburger"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <FiMenu />
+          </button>
+        </div>
       </div>
 
       {/* Drawer Overlay */}
@@ -143,7 +187,19 @@ export default function AdminDashboard() {
             className="admin-nav-item"
             onClick={() => setDrawerOpen(false)}
           >
-            <FiShoppingCart /> Orders
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                flex: 1,
+              }}
+            >
+              <FiShoppingCart /> Orders
+              {pendingCount > 0 && (
+                <span className="sidebar-order-badge">{pendingCount}</span>
+              )}
+            </div>
           </Link>
           <Link
             to="/admin/users"
@@ -190,6 +246,74 @@ export default function AdminDashboard() {
                 day: "numeric",
               })}
             </span>
+
+            {/* Notification Bell */}
+            <div style={{ position: "relative" }}>
+              <button
+                className="admin-notif-btn"
+                onClick={() => setShowNotif(!showNotif)}
+              >
+                <FiBell />
+                {pendingCount > 0 && (
+                  <span className="admin-notif-badge">{pendingCount}</span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotif && (
+                <>
+                  <div
+                    className="notif-overlay"
+                    onClick={() => setShowNotif(false)}
+                  />
+                  <div className="admin-notif-dropdown">
+                    <div className="notif-header">
+                      <strong>🛒 Pending Orders</strong>
+                      <span>{pendingCount} pending</span>
+                    </div>
+                    {newOrders.length === 0 ? (
+                      <p className="notif-empty">No pending orders 🎉</p>
+                    ) : (
+                      newOrders.map((order) => (
+                        <Link
+                          to="/admin/orders"
+                          key={order.id}
+                          className="notif-item"
+                          onClick={() => setShowNotif(false)}
+                        >
+                          <div className="notif-item-info">
+                            <span className="notif-order-id">
+                              #{order.id.slice(-6).toUpperCase()}
+                            </span>
+                            <span className="notif-customer">
+                              {order.userName || order.userEmail}
+                            </span>
+                          </div>
+                          <div className="notif-item-right">
+                            <span className="notif-amount">
+                              ₦{order.total?.toLocaleString()}
+                            </span>
+                            <span className="notif-time">
+                              {order.createdAt?.toDate
+                                ? order.createdAt.toDate().toLocaleDateString()
+                                : "N/A"}
+                            </span>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                    <Link
+                      to="/admin/orders"
+                      className="notif-view-all"
+                      onClick={() => setShowNotif(false)}
+                    >
+                      View All Orders →
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+
             <Link to="/" className="view-store-btn">
               View Store
             </Link>
@@ -205,6 +329,7 @@ export default function AdminDashboard() {
               icon: <FiPackage />,
               color: "#e85d04",
               change: "+12%",
+              badge: null,
             },
             {
               label: "Total Orders",
@@ -212,6 +337,7 @@ export default function AdminDashboard() {
               icon: <FiShoppingCart />,
               color: "#3b82f6",
               change: "+8%",
+              badge: pendingCount,
             },
             {
               label: "Total Users",
@@ -219,6 +345,7 @@ export default function AdminDashboard() {
               icon: <FiUsers />,
               color: "#8b5cf6",
               change: "+23%",
+              badge: null,
             },
             {
               label: "Total Revenue",
@@ -226,6 +353,7 @@ export default function AdminDashboard() {
               icon: <FiDollarSign />,
               color: "#10b981",
               change: "+15%",
+              badge: null,
             },
           ].map((card, i) => (
             <div
@@ -233,7 +361,12 @@ export default function AdminDashboard() {
               key={i}
               style={{ "--card-color": card.color }}
             >
-              <div className="stat-icon">{card.icon}</div>
+              <div className="stat-icon-wrap">
+                <div className="stat-icon">{card.icon}</div>
+                {card.badge > 0 && (
+                  <span className="stat-badge">{card.badge} pending</span>
+                )}
+              </div>
               <div className="stat-info">
                 <p className="stat-label">{card.label}</p>
                 <h3 className="stat-value">{loading ? "..." : card.value}</h3>
@@ -254,18 +387,13 @@ export default function AdminDashboard() {
             </Link>
             <Link to="/admin/orders" className="quick-action-card">
               <FiList /> <span>Manage Orders</span>
+              {pendingCount > 0 && (
+                <span className="quick-action-badge">{pendingCount}</span>
+              )}
             </Link>
             <Link to="/admin/users" className="quick-action-card">
               <FiUsers /> <span>View Users</span>
             </Link>
-            {/* <a
-              href="https://console.firebase.google.com"
-              target="_blank"
-              rel="noreferrer"
-              className="quick-action-card"
-            >
-              <FiSettings /> <span>Firebase Console</span>
-            </a> */}
           </div>
         </div>
 
@@ -354,8 +482,12 @@ export default function AdminDashboard() {
           <Link
             to="/admin/orders"
             className={`admin-bottom-nav-item ${location.pathname === "/admin/orders" ? "active" : ""}`}
+            style={{ position: "relative" }}
           >
             <FiShoppingCart />
+            {pendingCount > 0 && (
+              <span className="bottom-nav-order-badge">{pendingCount}</span>
+            )}
             <span>Orders</span>
           </Link>
           <Link

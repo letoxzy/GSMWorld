@@ -49,7 +49,6 @@ export default function AIAssistant() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Fetch products for context
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -87,10 +86,11 @@ export default function AIAssistant() {
     return `\n\nCurrent Products in Store:\n${list}`;
   }
 
-  async function sendMessage() {
-    if (!input.trim() || loading) return;
+  async function sendMessage(overrideInput) {
+    const text = overrideInput || input;
+    if (!text.trim() || loading) return;
 
-    const userMessage = { role: "user", content: input.trim() };
+    const userMessage = { role: "user", content: text.trim() };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
@@ -100,14 +100,12 @@ export default function AIAssistant() {
       const productContext = buildProductContext();
       const systemWithProducts = SYSTEM_PROMPT + productContext;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
           system: systemWithProducts,
           messages: newMessages.map((m) => ({
             role: m.role,
@@ -115,6 +113,10 @@ export default function AIAssistant() {
           })),
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
 
       const data = await response.json();
       const assistantMessage = {
@@ -126,7 +128,7 @@ export default function AIAssistant() {
 
       setMessages([...newMessages, assistantMessage]);
     } catch (e) {
-      console.error(e);
+      console.error("AI Error:", e);
       setMessages([
         ...newMessages,
         {
@@ -165,10 +167,8 @@ export default function AIAssistant() {
 
   return (
     <>
-      {/* Chat Window */}
       {open && (
         <div className={`ai-chat-window ${minimized ? "minimized" : ""}`}>
-          {/* Header */}
           <div className="ai-chat-header">
             <div className="ai-chat-header-info">
               <div className="ai-avatar-dot">
@@ -202,7 +202,6 @@ export default function AIAssistant() {
 
           {!minimized && (
             <>
-              {/* Messages */}
               <div className="ai-messages">
                 {messages.map((msg, i) => (
                   <div
@@ -225,7 +224,6 @@ export default function AIAssistant() {
                   </div>
                 ))}
 
-                {/* Typing indicator */}
                 {loading && (
                   <div className="ai-message assistant">
                     <div className="ai-msg-avatar">
@@ -241,17 +239,13 @@ export default function AIAssistant() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Questions */}
               {messages.length <= 1 && (
                 <div className="ai-quick-questions">
                   {QUICK_QUESTIONS.map((q, i) => (
                     <button
                       key={i}
                       className="ai-quick-btn"
-                      onClick={() => {
-                        setInput(q);
-                        setTimeout(() => sendMessage(), 0);
-                      }}
+                      onClick={() => sendMessage(q)}
                     >
                       {q}
                     </button>
@@ -259,7 +253,6 @@ export default function AIAssistant() {
                 </div>
               )}
 
-              {/* Input */}
               <div className="ai-input-area">
                 <div className="ai-input-wrap">
                   <textarea
@@ -274,7 +267,7 @@ export default function AIAssistant() {
                   />
                   <button
                     className="ai-send-btn"
-                    onClick={sendMessage}
+                    onClick={() => sendMessage()}
                     disabled={!input.trim() || loading}
                   >
                     <FiSend />
@@ -292,7 +285,6 @@ export default function AIAssistant() {
         </div>
       )}
 
-      {/* Float Button */}
       <button
         className={`ai-float-btn ${open ? "active" : ""}`}
         onClick={() => {

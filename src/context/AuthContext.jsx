@@ -74,6 +74,11 @@ export function AuthProvider({ children }) {
       if (user) {
         try {
           const snap = await getDoc(doc(db, "users", user.uid));
+          console.log("LOGGED IN UID:", user.uid);
+          console.log(
+            "PROFILE DATA:",
+            snap.exists() ? snap.data() : "NO PROFILE DOC FOUND",
+          );
           if (snap.exists()) setUserProfile(snap.data());
         } catch (err) {
           console.error("Failed to load user profile:", err);

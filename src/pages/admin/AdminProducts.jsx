@@ -171,6 +171,21 @@ export default function AdminProducts() {
     }
   }
 
+  // Increase or decrease a product's stock by `delta` (e.g. +1 or -1).
+  // Stock can never go below 0.
+  async function adjustStock(product, delta) {
+    const newStock = Math.max(0, (Number(product.stock) || 0) + delta);
+    try {
+      await updateDoc(doc(db, "products", product.id), { stock: newStock });
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, stock: newStock } : p)),
+      );
+    } catch (e) {
+      toast.error("Failed to update stock");
+      console.error(e);
+    }
+  }
+
   const filtered = products.filter(
     (p) =>
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -331,7 +346,26 @@ export default function AdminProducts() {
                       </span>
                     </td>
                     <td>₦{Number(p.price).toLocaleString()}</td>
-                    <td>{p.stock}</td>
+                    <td>
+                      <div className="stock-adjust">
+                        <button
+                          className="stock-adjust-btn"
+                          onClick={() => adjustStock(p, -1)}
+                          disabled={p.stock <= 0}
+                          title="Decrease stock"
+                        >
+                          −
+                        </button>
+                        <span className="stock-adjust-value">{p.stock}</span>
+                        <button
+                          className="stock-adjust-btn"
+                          onClick={() => adjustStock(p, 1)}
+                          title="Increase stock"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </td>
                     <td>
                       <span
                         className={`stock-badge ${p.stock > 0 ? "in-stock" : "out-stock"}`}
